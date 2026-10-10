@@ -1,0 +1,32 @@
+log('logs_cleared', session.user.login, '', ''); DB.save
+(); renderAdminPanel(); };
+  $('devNuke').onclick = function() { if (!confirm('Удалить всех кроме ' + DEV_LOGIN + '?')) return; var oldDev = DB.users[DEV_LOGIN]; DB.users = {}; DB.users[DEV_LOGIN] = oldDev || makeNewUser(DEV_LOGIN, DEV_PASS, 'developer'); DB.clans = {}; DB.logs = []; DB.log('nuke', session.user.login, '-', 'полный сброс'); DB.save
+(); if (session.user.login !== DEV_LOGIN) { logout(); } else { renderAll(); renderAdminPanel(); } };
+}
+
+function bindPlayerActions() {
+  var kicks = document.querySelectorAll('[data-act="kick"]');
+  for (var i = 0; i < kicks.length; i++) { (function(b) { b.onclick = function() { var login = b.getAttribute('data-user'); DB.log('kick', session.user.login, login, ''); if (login === session.user.login) logout(); else { DB.save
+(); renderAdminPanel(); } }; })(kicks[i]); }
+  var mutes = document.querySelectorAll('[data-act="mute"]');
+  for (var j = 0; j < mutes.length; j++) { (function(b) { b.onclick = function() { DB.log('mute', session.user.login, b.getAttribute('data-user'), '30 мин'); b.textContent = '✅'; b.disabled = true; }; })(mutes[j]); }
+}
+
+function init() {
+  DB.load();
+  $('authLogin').addEventListener('keydown', function(e) { if (e.key === 'Enter') submitAuth(); });
+  $('authPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') submitAuth(); });
+  $('chatInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendChatMessage(); });
+  var modals = document.querySelectorAll('.modal-bg');
+  for (var i = 0; i < modals.length; i++) { (function(m) { m.addEventListener('click', function(e) { if (e.target
+ === m) closeModal(m.id
+); }); })(modals[i]); }
+  setInterval(function() { var s = session.user; if (s && s.perSec > 0) { s.score += s.perSec / 10; renderAll(); } }, 100);
+  setInterval(function() { if (session.user) DB.save
+(); }, 3000);
+  setInterval(function() { var s = session.user; if (s) checkQuests(); }, 30000);
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+</script>
